@@ -10,7 +10,7 @@ namespace NCABuilder
 {
     class RomFSConstructor
     {
-        public static Tuple<byte[],byte[]> MakeRomFS(string InputFile)
+        public static Tuple<byte[],byte[]> MakeRomFS(string InputFile, uint Section, byte CTRO)
         {
             byte[] ReadInputFile = File.ReadAllBytes(InputFile);
 
@@ -89,10 +89,10 @@ namespace NCABuilder
             SuperBlockHashWriter.Dispose();
             SuperBlockHashMemStrm.Dispose();
 
-            byte[] RomHdr = RomFSConstructor(SuperBlockHash, (ulong)Lvl0.Length, (ulong)Lvl1.Length, (ulong)Lvl2.Length, (ulong)Lvl3.Length, (ulong)Lvl4.Length, PreAlignmentSize);
+            byte[] RomHdr = RomFSConstructor(SuperBlockHash, (ulong)Lvl0.Length, (ulong)Lvl1.Length, (ulong)Lvl2.Length, (ulong)Lvl3.Length, (ulong)Lvl4.Length, PreAlignmentSize, CTRO);
 
             byte[] Rom = RomFS(Lvl0, Lvl1, Lvl2, Lvl3, Lvl4, ReadInputFile);
-            byte[] Hdr = SectionHeader(Type_RomFS, Crypto_CTR, RomHdr);
+            byte[] Hdr = SectionHeader(Type_RomFS, (byte)Section, Crypto_CTR, RomHdr);
             return Tuple.Create(Hdr, Rom);
         }
     }

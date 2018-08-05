@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace NCABuilder
@@ -32,5 +33,31 @@ namespace NCABuilder
                 .Select(x => Convert.ToByte(String.Substring(x, 2), 16))
                 .ToArray();
         }
+
+        public static long GetNextMultiple(long value, int multiple)
+        {
+            if (multiple <= 0)
+                return value;
+
+            if (value % multiple == 0)
+                return value;
+
+            return value + multiple - value % multiple;
+        }
+
+        public static void ConcatenateFiles(string Output, params string[] Inputs)
+        {
+            using (Stream output = File.OpenWrite(Output))
+            {
+                foreach (string inputFile in Inputs)
+                {
+                    using (Stream In = File.OpenRead(inputFile))
+                    {
+                        In.CopyTo(output);
+                    }
+                }
+            }
+        }
+
     }
 }
