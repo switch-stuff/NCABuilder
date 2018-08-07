@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Numerics;
 using static NCABuilder.Utils;
 
 namespace NCABuilder
@@ -102,7 +101,11 @@ namespace NCABuilder
             return Mem.ToArray();
         }
 
-        public static byte[] Entry(uint StartOffset, uint EndOffset)
+        public static byte[] Entry
+            (
+            uint StartOffset,
+            uint EndOffset
+            )
         {
             uint[] StartSector =
             {
@@ -114,7 +117,11 @@ namespace NCABuilder
             return StartSector.SelectMany(BitConverter.GetBytes).ToArray();
         }
 
-        public static byte[] KeyArea(byte[] Key, byte[] Input)
+        public static byte[] KeyArea
+            (
+            byte[] Key,
+            byte[] Input
+            )
         {
             var Mem = new MemoryStream();
             var Final = new BinaryWriter(Mem);
@@ -152,7 +159,13 @@ namespace NCABuilder
             return Mem.ToArray();
         }
 
-        public static byte[] SectionHeader(byte FileSystem, byte Section, byte CryptoType, byte[] FSBlock)
+        public static byte[] SectionHeader
+            (
+            byte FileSystem,
+            byte Section,
+            byte CryptoType,
+            byte[] FSBlock
+            )
         {
             var Mem = new MemoryStream();
             var Final = new BinaryWriter(Mem);
@@ -167,7 +180,17 @@ namespace NCABuilder
             return Mem.ToArray();
         }
 
-        public static byte[] PFS0(byte[] Hash, uint BlockSize, uint PFSType, ulong HashTableOffset, ulong HashTableSize, ulong RelativeOffset, ulong RelativeByteSize, uint TypeCTR)
+        public static byte[] PFS0
+            (
+            byte[] Hash,
+            uint BlockSize,
+            uint PFSType,
+            ulong HashTableOffset,
+            ulong HashTableSize,
+            ulong RelativeOffset,
+            ulong RelativeByteSize,
+            uint TypeCTR
+            )
         {
             var Mem = new MemoryStream();
             var Final = new BinaryWriter(Mem);
@@ -185,7 +208,14 @@ namespace NCABuilder
             return Mem.ToArray();
         }
 
-        public static byte[] RomFS(byte[] Level0, byte[] Level1, byte[] Level2, byte[] Level3, byte[] Level4, byte[] Level5)
+        public static byte[] RomFS
+            (
+            byte[] Level0,
+            byte[] Level1,
+            byte[] Level2,
+            byte[] Level3,
+            byte[] Level4
+            )
         {
             var Mem = new MemoryStream();
             var Final = new BinaryWriter(Mem);
@@ -194,17 +224,30 @@ namespace NCABuilder
             Final.Write(Level2);
             Final.Write(Level3);
             Final.Write(Level4);
-            Final.Write(Level5);
             Final.Dispose();
             return Mem.ToArray();
         }
 
-        public static byte[] RomFSSetSizeLevelBody(byte[] Hash, int Size)
+        public static byte[] RomFSSetSizeLevelBody
+            (
+            byte[] Hash,
+            int Size
+            )
         {
             return Hash.Concat(Pad(Size)).ToArray();
         }
 
-        public static byte[] RomFS_IVFC(byte[] Hash, byte[] Level0Hdr, byte[] Level1Hdr, byte[] Level2Hdr, byte[] Level3Hdr, byte[] Level4Hdr, byte[] Level5Hdr, uint TypeCTR)
+        public static byte[] RomFS_IVFC
+            (
+            byte[] Hash,
+            byte[] Level0Hdr,
+            byte[] Level1Hdr,
+            byte[] Level2Hdr,
+            byte[] Level3Hdr,
+            byte[] Level4Hdr,
+            byte[] Level5Hdr,
+            uint TypeCTR
+            )
         {
             var Mem = new MemoryStream();
             var Final = new BinaryWriter(Mem);
@@ -226,7 +269,12 @@ namespace NCABuilder
             return Mem.ToArray();
         }
 
-        public static byte[] Level(ulong LevelOffset, ulong LevelSize, uint LevelBlockSize)
+        public static byte[] Level
+            (
+            ulong LevelOffset,
+            ulong LevelSize,
+            uint LevelBlockSize
+            )
         {
             var Mem = new MemoryStream();
             var Final = new BinaryWriter(Mem);
@@ -238,51 +286,29 @@ namespace NCABuilder
             return Mem.ToArray();
         }
 
-        public static byte[] Level0(ulong Offset, ulong Size)
+        public static byte[] RomFSConstructor
+            (
+            byte[] Hash,
+            ulong SizeLevel0,
+            ulong SizeLevel1,
+            ulong SizeLevel2,
+            ulong SizeLevel3,
+            ulong SizeLevel4,
+            ulong SizeLevel5,
+            byte Section
+            )
         {
-            return Level(Offset, Size, 0xE);
-        }
-
-        public static byte[] Level1(ulong Offset, ulong Size)
-        {
-            return Level(Offset, Size, 0xE);
-        }
-
-        public static byte[] Level2(ulong Offset, ulong Size)
-        {
-            return Level(Offset, Size, 0xE);
-        }
-
-        public static byte[] Level3(ulong Offset, ulong Size)
-        {
-            return Level(Offset, Size, 0xE);
-        }
-
-        public static byte[] Level4(ulong Offset, ulong Size)
-        {
-            return Level(Offset, Size, 0xE);
-        }
-
-        public static byte[] Level5(ulong Offset, ulong Size)
-        {
-            return Level(Offset, Size, 0xE);
-        }
-
-        public static byte[] RomFSConstructor(byte[] Hash, ulong SizeLevel0, ulong SizeLevel1, ulong SizeLevel2, ulong SizeLevel3, ulong SizeLevel4, ulong SizeLevel5, byte Section)
-        {
-            return RomFS_IVFC(
+            return RomFS_IVFC
+                (
                 Hash,
-            Level0(0, SizeLevel0),
-            Level1(SizeLevel0, SizeLevel1),
-            Level2(SizeLevel0 + SizeLevel1, SizeLevel2),
-            Level3(SizeLevel0 + SizeLevel1 + SizeLevel2, SizeLevel3),
-            Level4(SizeLevel0 + SizeLevel1 + SizeLevel2 + SizeLevel3, SizeLevel4),
-            Level5(SizeLevel0 + SizeLevel1 + SizeLevel2 + SizeLevel3 + SizeLevel4, SizeLevel5), Section);
-        }
-
-        public static byte[] NCA(byte[] Header, ref byte[] Body)
-        {
-            return Header.Concat(Align(ref Body, 0x200)).ToArray();
+                Level(0, SizeLevel0, 0xE),
+                Level(SizeLevel0, SizeLevel1, 0xE),
+                Level(SizeLevel0 + SizeLevel1, SizeLevel2, 0xE),
+                Level(SizeLevel0 + SizeLevel1 + SizeLevel2, SizeLevel3, 0xE),
+                Level(SizeLevel0 + SizeLevel1 + SizeLevel2 + SizeLevel3, SizeLevel4, 0xE),
+                Level(SizeLevel0 + SizeLevel1 + SizeLevel2 + SizeLevel3 + SizeLevel4, SizeLevel5, 0xE),
+                Section
+                );
         }
 
         public static byte[] Ticket(string Issuer, byte[] Titlekey, byte Type, byte KeyRevision, byte[] RightsID)

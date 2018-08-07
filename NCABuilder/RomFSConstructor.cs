@@ -1,34 +1,35 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
-using static NCABuilder.Utils;
+using System.Security.Cryptography;
 using static NCABuilder.CryptoInitialisers;
 using static NCABuilder.Structs;
-using System.IO;
-using System.Security.Cryptography;
+using static NCABuilder.Utils;
 
 namespace NCABuilder
 {
-    class RomFSConstructor
+    internal class RomFSConstructor
     {
-        public static Tuple<byte[],byte[]> MakeRomFS(string InputFile, uint Section, byte CTRO)
-        {
-            byte[] ReadInputFile = File.ReadAllBytes(InputFile);
 
-            ulong PreAlignmentSize = (ulong)ReadInputFile.LongLength;
-            Align(ref ReadInputFile, 0x200);
-            byte[] AlignForHashing = Align(ref ReadInputFile, 0x4000);
+        public static Tuple<byte[], byte[]> MakeRomFS(string InputFile, uint Section, byte CTRO)
+        {
+            byte[] Buf = new byte[0x4000];
+            var Input = File.Open(InputFile, FileMode.Open);
+            ulong PreAlignmentSize = (ulong)new FileInfo(InputFile).Length;
             var L4MemStrm = new MemoryStream();
             var L4Writer = new BinaryWriter(L4MemStrm);
-            foreach (int i in Enumerable.Range(0, (int)Math.Ceiling((decimal)AlignForHashing.Length / 0x4000)))
+            var SHA = new SHA256Managed();
+            foreach (int i in Enumerable.Range(0, (((int)Math.Ceiling((decimal)Input.Length / 0x4000) * 0x4000)) / 0x4000))
             {
-                var SHA = new SHA256Managed();
-                L4Writer.Write(SHA.ComputeHash(AlignForHashing, i * 0x4000, 0x4000));
-                L4Writer.Flush();
+                Input.Read(Buf, 0, 0x4000);
+                Align(ref Buf, 0x4000);
+                L4Writer.Write(SHA.ComputeHash(Buf));
             }
             byte[] Lvl4 = RomFSSetSizeLevelBody(L4MemStrm.ToArray(), ((int)Math.Ceiling((decimal)(PreAlignmentSize / 0x200) / 0x4000) * 0x4000) - (L4MemStrm.ToArray().Length));
             Align(ref Lvl4, 0x4000);
             L4Writer.Dispose();
             L4MemStrm.Dispose();
+            Input.Dispose();
 
             var L3MemStrm = new MemoryStream();
             var L3Writer = new BinaryWriter(L3MemStrm);
@@ -91,7 +92,7 @@ namespace NCABuilder
 
             byte[] RomHdr = RomFSConstructor(SuperBlockHash, (ulong)Lvl0.Length, (ulong)Lvl1.Length, (ulong)Lvl2.Length, (ulong)Lvl3.Length, (ulong)Lvl4.Length, PreAlignmentSize, CTRO);
 
-            byte[] Rom = RomFS(Lvl0, Lvl1, Lvl2, Lvl3, Lvl4, ReadInputFile);
+            byte[] Rom = RomFS(Lvl0, Lvl1, Lvl2, Lvl3, Lvl4);
             byte[] Hdr = SectionHeader(Type_RomFS, (byte)Section, Crypto_CTR, RomHdr);
             return Tuple.Create(Hdr, Rom);
         }

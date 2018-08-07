@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -7,7 +6,6 @@ namespace NCABuilder
 {
     internal class Utils
     {
-
         // Produces a zero-byte array of a specified length.
         public static byte[] Pad(int Count)
         {
@@ -58,6 +56,5 @@ namespace NCABuilder
                 }
             }
         }
-
     }
 }

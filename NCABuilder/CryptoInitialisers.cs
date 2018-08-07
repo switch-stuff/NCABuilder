@@ -13,11 +13,13 @@ namespace NCABuilder
             RNG.GetBytes(RandomKey);
             return RandomKey;
         }
+
         public static byte[] GenSHA256Hash(byte[] Data)
         {
             var SHA = SHA256.Create();
             return SHA.ComputeHash(Data);
         }
+
         // Thanks, Falo!
         public static byte[] AES_XTS(byte[] Key1, byte[] Key2, int SectorSize, byte[] Data, ulong Sector)
         {
@@ -36,6 +38,7 @@ namespace NCABuilder
             }
             return MemStrm.ToArray();
         }
+
         public static byte[] AES_EBC(byte[] Key, byte[] Data)
         {
             var AES = new RijndaelManaged
@@ -47,6 +50,7 @@ namespace NCABuilder
             AES.CreateEncryptor().TransformBlock(Data, 0, 0x40, TransformedData, 0);
             return TransformedData;
         }
+
         public static byte[] AES_CTR(byte[] Key, byte[] CTR, byte[] Data)
         {
             byte[] Buffer = new byte[Data.Length];
@@ -55,6 +59,14 @@ namespace NCABuilder
             Transform = AESCTR.CreateEncryptor(Key, null);
             Transform.TransformBlock(Data, 0, Data.Length, Buffer, 0);
             return Buffer;
+        }
+
+        public static byte[] Encrypt_RSA_2048_OAEP_MGF1_SHA256(byte[] Input, RSAParameters Params)
+        {
+            var RSA = new RSACng();
+            RSA.ImportParameters(Params);
+            var SHA256Padding = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.SHA256);
+            return RSA.Encrypt(Input, SHA256Padding);
         }
     }
 }

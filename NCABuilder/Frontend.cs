@@ -2,9 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Windows.Forms;
-using static NCABuilder.Structs;
 
 namespace NCABuilder
 {
@@ -17,7 +15,13 @@ namespace NCABuilder
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
         }
+
+        byte KeyGeneration;
+        byte KeyIdx;
+        byte ContentType;
+        ulong TitleID;
 
         private void TextBox2_MouseClick(object sender, EventArgs e)
         {
@@ -63,7 +67,6 @@ namespace NCABuilder
                 ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
                 treeView1.ExpandAll();
                 Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                timer1.Start();
                 tabControl1.SelectTab(1);
                 textBox1.Text = folderBrowserDialog1.SelectedPath;
             }
@@ -75,28 +78,28 @@ namespace NCABuilder
                 ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
                 treeView1.ExpandAll();
                 Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                timer1.Start();
                 tabControl1.SelectTab(1);
+                textBox1.Text = folderBrowserDialog1.SelectedPath;
             }
             else if (type == 3)
-            {
-                folderBrowserDialog1.ShowDialog();
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
-                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-                treeView1.ExpandAll();
-                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                timer1.Start();
-                tabControl1.SelectTab(1);
-            }
-            else if (type == 4)
             {
                 folderBrowserDialog1.ShowDialog();
                 Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
                 ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
                 treeView1.ExpandAll();
                 Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                timer1.Start();
                 tabControl1.SelectTab(1);
+                textBox1.Text = folderBrowserDialog1.SelectedPath;
+            }
+            else if (type == 4)
+            {
+                folderBrowserDialog1.ShowDialog();
+                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
+                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                treeView1.ExpandAll();
+                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
+                tabControl1.SelectTab(1);
+                textBox1.Text = folderBrowserDialog1.SelectedPath;
             }
             else if (type == 5)
             {
@@ -105,114 +108,9 @@ namespace NCABuilder
                 ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
                 treeView1.ExpandAll();
                 Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                timer1.Start();
                 tabControl1.SelectTab(1);
+                textBox1.Text = folderBrowserDialog1.SelectedPath;
             }
-        }
-
-        /*private void NCABuild()
-        {
-            byte[] HeaderKey1 = new byte[0x10];
-            byte[] HeaderKey2 = new byte[0x10];
-            foreach (string line in File.ReadLines(@"keys.txt"))
-            {
-                if (line.Contains("header_key"))
-                {
-                    HeaderKey1 = Utils.StringToBytes(line.Replace(" ", "").Replace("=", "").Substring(11, 32));
-                    HeaderKey2 = Utils.StringToBytes(line.Replace(" ", "").Replace("=", "").Substring(43, 32));
-                }
-            }
-            var RomFS = RomFSConstructor.MakeRomFS("test.romfs", 0);
-
-            uint Entry1Offset = 0xC00;
-            byte Entry1Id = 0;
-            byte[] Entry1 = Entry(Entry1Offset, (uint)RomFS.Item2.LongLength);
-
-            byte[] Key = CryptoInitialisers.GenerateRandomKey(0x10);
-            byte[] Keys = KeyArea(Utils.StringToBytes("XXXX"), Key);
-            byte[] Head = Header(Utils.Pad(0x100), Utils.Pad(0x100), NCA3, NCAType_Digital, ContentType, CryptoType_Updated, KeyIdx, 0xC00 + (ulong)RomFS.Item2.LongLength, 0x0100AA00AAAA000, 0xFFFFFFFF, KeyGeneration, Utils.Pad(0x10), Entry1, Utils.Pad(0x10), Utils.Pad(0x10), Utils.Pad(0x10), CryptoInitialisers.GenSHA256Hash(RomFS.Item1), Utils.Pad(0x20), Utils.Pad(0x20), Utils.Pad(0x20), Keys);
-            byte[] Final = NCAHeader(Head, RomFS.Item1, Utils.Pad(0x200), Utils.Pad(0x200), Utils.Pad(0x200));
-
-            byte[] CryptRom = CryptoInitialisers.AES_CTR(Key, BitConverter.GetBytes((uint)Entry1Id).Concat(Utils.Pad(0x8).Concat(BitConverter.GetBytes(Entry1Offset >> 4)).Reverse()).ToArray(), RomFS.Item2);
-
-            byte[] NCAn = NCA(CryptoInitialisers.AES_XTS(HeaderKey1, HeaderKey2, 0x200, Final, 0), ref CryptRom);
-            File.WriteAllBytes("test.nca", NCAn);
-        }*/
-
-        /*private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (comboBox3.SelectedItem)
-            {
-                case "Program":
-                    ContentType = ContentType_Program;
-                    break;
-                case "Meta":
-                    ContentType = ContentType_Meta;
-                    break;
-                case "Control":
-                    ContentType = ContentType_Control;
-                    break;
-                case "Manual":
-                    ContentType = ContentType_Manual;
-                    break;
-                case "Data":
-                    ContentType = ContentType_Data;
-                    break;
-                case "AOC":
-                    ContentType = ContentType_AOC;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void KeyGen_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (KeyGen.SelectedItem)
-            {
-                case "1 (1.0.0-2.3.0)":
-                    KeyGeneration = KeyGeneration_Firmware100_230;
-                    break;
-                case "2 (3.0.0)":
-                    KeyGeneration = KeyGeneration_Firmware300;
-                    break;
-                case "3 (3.0.1-3.0.2)":
-                    KeyGeneration = KeyGeneration_Firmware301_302;
-                    break;
-                case "4 (4.0.0-4.1.0)":
-                    KeyGeneration = KeyGeneration_Firmware400_410;
-                    break;
-                case "5 (5.0.0-Now)":
-                    KeyGeneration = KeyGeneration_Firmware500;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void KeyIndex_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (KeyIndex.SelectedItem)
-            {
-                case "Application":
-                    KeyIdx = KeyIndex_Application;
-                    break;
-                case "Ocean":
-                    KeyIdx = KeyIndex_Ocean;
-                    break;
-                case "System":
-                    KeyIdx = KeyIndex_System;
-                    break;
-                default:
-                    break;
-            }
-        }*/
-
-        private void Timer1_Tick(object sender, EventArgs e)
-        {
-            treeView1.Nodes.Clear();
-            ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-            treeView1.ExpandAll();
         }
 
         private void Button2_Click_1(object sender, EventArgs e)
@@ -226,19 +124,19 @@ namespace NCABuilder
         {
             switch (comboBox5.SelectedItem)
             {
-                case "ExeFS, RomFS, PFS0 (Logo)":
+                case "ExeFS + RomFS + PFS0 (Logo)":
                     type = 1;
                     break;
-                case "ExeFS, RomFS":
+                case "ExeFS + RomFS":
                     type = 2;
                     break;
-                case "ExeFS":
+                case "RomFS Only":
                     type = 3;
                     break;
-                case "RomFS":
+                case "ExeFS Only":
                     type = 4;
                     break;
-                case "PFS0":
+                case "PFS0 Only":
                     type = 5;
                     break;
                 default:
@@ -247,19 +145,155 @@ namespace NCABuilder
             button1.Enabled = true;
         }
 
-        private void textBox2_MouseClick(object sender, MouseEventArgs e)
-        {
-
-        }
-
         private void button3_Click(object sender, EventArgs e)
         {
-            PresetDefines.Standard_Application(ContentType_Program, KeyIndex_Application, KeyGeneration_Firmware500, folderBrowserDialog1.SelectedPath, BitConverter.ToUInt64(Utils.StringToBytes(textBox2.Text).Reverse().ToArray(), 0), 0xFFFFFFFF, textBox3, textBox4);
+            if (KeyGen.Text != "" && KeyIndex.Text != "" && comboBox3.Text != "")
+            {
+                string[] Keys = { };
+                string HeaderKey = null;
+                string KeyAreaKey = null;
+                string Index = KeyIndex.SelectedItem.ToString().ToLower();
+                string Generation = KeyGen.SelectedItem.ToString().Substring(0, 2);
+                try
+                {
+                    Keys = File.ReadAllLines("keys.txt");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Error: keys.txt not present in directory.");
+                }
+                try
+                {
+                    HeaderKey = Keys.FirstOrDefault(T => T.StartsWith("header_key")).Split(Convert.ToChar("="))[1].Trim();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Error: Header key not present in your keys file.");
+                }
+                try
+                {
+                    KeyAreaKey = Keys.FirstOrDefault(T => T.StartsWith($"key_area_key_{Index}_{Generation}")).Split(Convert.ToChar("="))[1].Trim();
+                }
+                catch
+                {
+                    MessageBox.Show($"Error: Key area key {Index} {Generation} not present in your keys file.");
+                }
+                //if (type == 1)
+                //    PresetDefines.Standard_Application(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                /*else*/ if (type == 2)
+                    PresetDefines.ExeFS_RomFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                else if (type == 3)
+                    PresetDefines.RomFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                else if (type == 4)
+                    PresetDefines.ExeFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                else if (type == 5)
+                    PresetDefines.PFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+            }
+            else
+            {
+                MessageBox.Show("Error: Please ensure you have made a selection for all relevant options.");
+            }
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
+            if (!ulong.TryParse(textBox2.Text, System.Globalization.NumberStyles.HexNumber, System.Globalization.NumberFormatInfo.CurrentInfo, out TitleID) && textBox2.Text != String.Empty)
+            {
+                textBox2.Text = textBox2.Text.Remove(textBox2.Text.Length - 1, 1);
+                textBox2.SelectionStart = textBox2.Text.Length;
+            }
+        }
 
+        private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                contextMenuStrip1.Show(Cursor.Position);
+            }
+        }
+
+        private void deleteFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                File.Delete($"{folderBrowserDialog1.SelectedPath}/{treeView1.SelectedNode.Parent.Text}/{treeView1.SelectedNode.Text}");
+                treeView1.Nodes.Clear();
+                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                treeView1.ExpandAll();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Please choose a file to delete, not a directory.");
+            }
+        }
+
+        private void KeyGen_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+            switch (KeyGen.SelectedItem)
+            {
+                case "00 (1.0.0-2.3.0)":
+                    KeyGeneration = 0;
+                    break;
+                case "01 (3.0.0)":
+                    KeyGeneration = 0;
+                    break;
+                case "02 (3.0.1-3.0.2)":
+                    KeyGeneration = 3;
+                    break;
+                case "03 (4.0.0-4.1.0)":
+                    KeyGeneration = 4;
+                    break;
+                case "04 (5.0.0-Now)":
+                    KeyGeneration = 5;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void comboBox3_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+            switch (comboBox3.SelectedItem)
+            {
+                case "Program":
+                    ContentType = 0;
+                    break;
+                case "Meta":
+                    ContentType = 1;
+                    break;
+                case "Control":
+                    ContentType = 2;
+                    break;
+                case "Manual":
+                    ContentType = 3;
+                    break;
+                case "Data":
+                    ContentType = 4;
+                    break;
+                case "AOC":
+                    ContentType = 5;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void KeyIndex_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+            switch (KeyIndex.SelectedItem)
+            {
+                case "Application":
+                    KeyIdx = 0;
+                    break;
+                case "Ocean":
+                    KeyIdx = 1;
+                    break;
+                case "System":
+                    KeyIdx = 2;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
