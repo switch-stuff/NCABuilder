@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Security.Cryptography;
 
-public class Aes128CounterMode : SymmetricAlgorithm
+public class AES128CTR : SymmetricAlgorithm
 {
     private readonly byte[] Counter;
 
-    private readonly AesManaged AESCtr; public Aes128CounterMode(byte[] CTR)
+    private readonly AesManaged AESCtr; public AES128CTR(byte[] CTR)
     {
         AESCtr = new AesManaged
         {

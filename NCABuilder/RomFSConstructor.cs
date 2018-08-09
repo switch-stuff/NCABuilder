@@ -19,10 +19,10 @@ namespace NCABuilder
             var L4MemStrm = new MemoryStream();
             var L4Writer = new BinaryWriter(L4MemStrm);
             var SHA = new SHA256Managed();
-            foreach (int i in Enumerable.Range(0, (((int)Math.Ceiling((decimal)Input.Length / 0x4000) * 0x4000)) / 0x4000))
+            foreach (int i in Enumerable.Range(0, ((((int)Math.Ceiling((decimal)Input.Length / 0x4000) * 0x4000)) / 0x4000)))
             {
+                Buf = Utils.Pad(0x4000);
                 Input.Read(Buf, 0, 0x4000);
-                Align(ref Buf, 0x4000);
                 L4Writer.Write(SHA.ComputeHash(Buf));
             }
             byte[] Lvl4 = RomFSSetSizeLevelBody(L4MemStrm.ToArray(), ((int)Math.Ceiling((decimal)(PreAlignmentSize / 0x200) / 0x4000) * 0x4000) - (L4MemStrm.ToArray().Length));

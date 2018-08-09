@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NCABuilder
@@ -15,18 +16,19 @@ namespace NCABuilder
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
-        byte KeyGeneration;
-        byte KeyIdx;
-        byte ContentType;
-        ulong TitleID;
+        private byte KeyGeneration;
+        private byte KeyIdx;
+        private byte ContentType;
+        private byte CryptoType;
+        private byte NCAType;
+        private ulong TitleID;
 
         private void TextBox2_MouseClick(object sender, EventArgs e)
         {
             OnClick(e);
-                textBox2.Text = null;
+            textBox2.Text = null;
         }
 
         private void Button2_Click(object sender, EventArgs e)
@@ -58,58 +60,65 @@ namespace NCABuilder
 
         private void Button1_Click_1(object sender, EventArgs e)
         {
-            if (type == 1)
+            if (comboBox5.Text != "")
             {
-                folderBrowserDialog1.ShowDialog();
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/Logo/");
-                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-                treeView1.ExpandAll();
-                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                tabControl1.SelectTab(1);
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
+                if (type == 1)
+                {
+                    folderBrowserDialog1.ShowDialog();
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/Logo/");
+                    ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                    treeView1.ExpandAll();
+                    Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
+                    tabControl1.SelectTab(1);
+                    textBox1.Text = folderBrowserDialog1.SelectedPath;
+                }
+                else if (type == 2)
+                {
+                    folderBrowserDialog1.ShowDialog();
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
+                    ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                    treeView1.ExpandAll();
+                    Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
+                    tabControl1.SelectTab(1);
+                    textBox1.Text = folderBrowserDialog1.SelectedPath;
+                }
+                else if (type == 3)
+                {
+                    folderBrowserDialog1.ShowDialog();
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
+                    ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                    treeView1.ExpandAll();
+                    Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
+                    tabControl1.SelectTab(1);
+                    textBox1.Text = folderBrowserDialog1.SelectedPath;
+                }
+                else if (type == 4)
+                {
+                    folderBrowserDialog1.ShowDialog();
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
+                    ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                    treeView1.ExpandAll();
+                    Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
+                    tabControl1.SelectTab(1);
+                    textBox1.Text = folderBrowserDialog1.SelectedPath;
+                }
+                else if (type == 5)
+                {
+                    folderBrowserDialog1.ShowDialog();
+                    Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/PFS0/");
+                    ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
+                    treeView1.ExpandAll();
+                    Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
+                    tabControl1.SelectTab(1);
+                    textBox1.Text = folderBrowserDialog1.SelectedPath;
+                }
             }
-            else if (type == 2)
+            else
             {
-                folderBrowserDialog1.ShowDialog();
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
-                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-                treeView1.ExpandAll();
-                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                tabControl1.SelectTab(1);
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
-            }
-            else if (type == 3)
-            {
-                folderBrowserDialog1.ShowDialog();
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/RomFS/");
-                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-                treeView1.ExpandAll();
-                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                tabControl1.SelectTab(1);
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
-            }
-            else if (type == 4)
-            {
-                folderBrowserDialog1.ShowDialog();
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/ExeFS/");
-                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-                treeView1.ExpandAll();
-                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                tabControl1.SelectTab(1);
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
-            }
-            else if (type == 5)
-            {
-                folderBrowserDialog1.ShowDialog();
-                Directory.CreateDirectory($@"{folderBrowserDialog1.SelectedPath}/PFS0/");
-                ListDirectory(treeView1, $@"{folderBrowserDialog1.SelectedPath}/");
-                treeView1.ExpandAll();
-                Process.Start($@"{folderBrowserDialog1.SelectedPath}/");
-                tabControl1.SelectTab(1);
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
+                MessageBox.Show("Please select a preset first.");
             }
         }
 
@@ -127,27 +136,31 @@ namespace NCABuilder
                 case "ExeFS + RomFS + PFS0 (Logo)":
                     type = 1;
                     break;
+
                 case "ExeFS + RomFS":
                     type = 2;
                     break;
+
                 case "RomFS Only":
                     type = 3;
                     break;
+
                 case "ExeFS Only":
                     type = 4;
                     break;
+
                 case "PFS0 Only":
                     type = 5;
                     break;
+
                 default:
                     break;
             }
-            button1.Enabled = true;
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (KeyGen.Text != "" && KeyIndex.Text != "" && comboBox3.Text != "")
+            if (KeyGen.Text != "" && KeyIndex.Text != "" && comboBox3.Text != "" && comboBox1.Text != "" && comboBox5.Text != "")
             {
                 string[] Keys = { };
                 string HeaderKey = null;
@@ -178,16 +191,18 @@ namespace NCABuilder
                 {
                     MessageBox.Show($"Error: Key area key {Index} {Generation} not present in your keys file.");
                 }
-                //if (type == 1)
-                //    PresetDefines.Standard_Application(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
-                /*else*/ if (type == 2)
-                    PresetDefines.ExeFS_RomFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                richTextBox1.Clear();
+                richTextBox1.AppendText("Starting build...\r\n");
+                if (type == 1)
+                    PresetDefines.Standard_Application(ContentType, KeyIdx, KeyGeneration, CryptoType, NCAType, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey, richTextBox1);
+                else if (type == 2)
+                    PresetDefines.ExeFS_RomFS(ContentType, KeyIdx, KeyGeneration, CryptoType, NCAType, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey, richTextBox1);
                 else if (type == 3)
-                    PresetDefines.RomFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                    PresetDefines.RomFS(ContentType, KeyIdx, KeyGeneration, CryptoType, NCAType, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey, richTextBox1);
                 else if (type == 4)
-                    PresetDefines.ExeFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                    PresetDefines.ExeFS(ContentType, KeyIdx, KeyGeneration, CryptoType, NCAType, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey, richTextBox1);
                 else if (type == 5)
-                    PresetDefines.PFS(ContentType, KeyIdx, KeyGeneration, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey);
+                    PresetDefines.PFS(ContentType, KeyIdx, KeyGeneration, CryptoType, NCAType, folderBrowserDialog1.SelectedPath, TitleID, 0x05040000, HeaderKey, KeyAreaKey, richTextBox1);
             }
             else
             {
@@ -232,20 +247,30 @@ namespace NCABuilder
             switch (KeyGen.SelectedItem)
             {
                 case "00 (1.0.0-2.3.0)":
-                    KeyGeneration = 0;
+                    KeyGeneration = Structs.KeyGeneration_Firmware100_230;
+                    CryptoType = Structs.CryptoType_Original;
                     break;
+
                 case "01 (3.0.0)":
-                    KeyGeneration = 0;
+                    KeyGeneration = Structs.KeyGeneration_Firmware300;
+                    CryptoType = Structs.CryptoType_Updated;
                     break;
+
                 case "02 (3.0.1-3.0.2)":
-                    KeyGeneration = 3;
+                    KeyGeneration = Structs.KeyGeneration_Firmware301_302;
+                    CryptoType = Structs.CryptoType_Updated;
                     break;
+
                 case "03 (4.0.0-4.1.0)":
-                    KeyGeneration = 4;
+                    KeyGeneration = Structs.KeyGeneration_Firmware400_410;
+                    CryptoType = Structs.CryptoType_Updated;
                     break;
+
                 case "04 (5.0.0-Now)":
-                    KeyGeneration = 5;
+                    KeyGeneration = Structs.KeyGeneration_Firmware500;
+                    CryptoType = Structs.CryptoType_Updated;
                     break;
+
                 default:
                     break;
             }
@@ -256,23 +281,29 @@ namespace NCABuilder
             switch (comboBox3.SelectedItem)
             {
                 case "Program":
-                    ContentType = 0;
+                    ContentType = Structs.ContentType_Program;
                     break;
+
                 case "Meta":
-                    ContentType = 1;
+                    ContentType = Structs.ContentType_Meta;
                     break;
+
                 case "Control":
-                    ContentType = 2;
+                    ContentType = Structs.ContentType_Control;
                     break;
+
                 case "Manual":
-                    ContentType = 3;
+                    ContentType = Structs.ContentType_Manual;
                     break;
+
                 case "Data":
-                    ContentType = 4;
+                    ContentType = Structs.ContentType_Data;
                     break;
+
                 case "AOC":
-                    ContentType = 5;
+                    ContentType = Structs.ContentType_AOC;
                     break;
+
                 default:
                     break;
             }
@@ -283,14 +314,34 @@ namespace NCABuilder
             switch (KeyIndex.SelectedItem)
             {
                 case "Application":
-                    KeyIdx = 0;
+                    KeyIdx = Structs.KeyIndex_Application;
                     break;
+
                 case "Ocean":
-                    KeyIdx = 1;
+                    KeyIdx = Structs.KeyIndex_Ocean;
                     break;
+
                 case "System":
-                    KeyIdx = 2;
+                    KeyIdx = Structs.KeyIndex_System;
                     break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBox1.SelectedItem)
+            {
+                case "Digital":
+                    NCAType = Structs.NCAType_Digital;
+                    break;
+
+                case "Cartridge":
+                    NCAType = Structs.NCAType_Cartridge;
+                    break;
+
                 default:
                     break;
             }

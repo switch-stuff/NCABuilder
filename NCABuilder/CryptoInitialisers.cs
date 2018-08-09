@@ -20,6 +20,12 @@ namespace NCABuilder
             return SHA.ComputeHash(Data);
         }
 
+        public static byte[] GenSHA256StrmHash(Stream Data)
+        {
+            var SHA = SHA256.Create();
+            return SHA.ComputeHash(Data);
+        }
+
         // Thanks, Falo!
         public static byte[] AES_XTS(byte[] Key1, byte[] Key2, int SectorSize, byte[] Data, ulong Sector)
         {
@@ -54,7 +60,7 @@ namespace NCABuilder
         public static byte[] AES_CTR(byte[] Key, byte[] CTR, byte[] Data)
         {
             byte[] Buffer = new byte[Data.Length];
-            var AESCTR = new Aes128CounterMode(CTR);
+            var AESCTR = new AES128CTR(CTR);
             ICryptoTransform Transform;
             Transform = AESCTR.CreateEncryptor(Key, null);
             Transform.TransformBlock(Data, 0, Data.Length, Buffer, 0);
